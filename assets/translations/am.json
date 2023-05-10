@@ -1,0 +1,11 @@
+{
+  "title":"Et Jobs",
+  "msg":"{} are written in the {} language",
+  "msg_named":"Easy localization is written in the {lang} language",
+  "msg_mixed":"{} are written in the {lang} language",
+  "gender":{
+    "male":"male",
+    "female":"female",
+    "other":"other"
+  }
+}
