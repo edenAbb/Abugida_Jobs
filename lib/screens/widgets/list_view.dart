@@ -3,6 +3,7 @@ import 'package:et_job/models/job.dart';
 import 'package:et_job/models/notification.dart';
 import 'package:et_job/models/transaction.dart';
 import 'package:et_job/routes/shared.dart';
+import 'package:et_job/screens/notifications/view_notification.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/user.dart';
@@ -30,7 +31,8 @@ class ListCard extends StatelessWidget {
         ),
         child: role == UserRole.employee ? forEmployee(context):
         role == UserRole.employer ? forEmployer(context):
-        role == UserRole.admin ? forEmployer(context):Container(),
+        role == UserRole.admin ? forEmployer(context):
+        Container(child: Center(child: Text("Something went wrong!")),),
 
       ),
     );
@@ -427,64 +429,70 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      margin: const EdgeInsets.only(top: 5),
-      child: Container(
-        decoration: const BoxDecoration(
-          //color: ColorProvider.primaryDarkColor,
-          borderRadius: BorderRadius.all(
-            Radius.circular(15),
-          ),
+    return GestureDetector(
+      onTap: (){
+        Navigator.pushNamed(context, ViewNTFS.routeName,
+            arguments: NtfsDetailArgs(notification: notification));
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
         ),
-        child: Row(
-          children: [
-            SizedBox(
-              height: 50,
-              width: 40,
-              //child: SvgPicture.asset(svgSrc),
-              child: Center(
-                  child: Icon(
-                    notification.type == 1 ? Icons.notifications:
-                    Icons.currency_bitcoin,
-                color: theme,
-                size: 50,
-              )),
+        margin: const EdgeInsets.only(top: 5),
+        child: Container(
+          decoration: const BoxDecoration(
+            //color: ColorProvider.primaryDarkColor,
+            borderRadius: BorderRadius.all(
+              Radius.circular(15),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      notification.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 15,
-                        //color: ColorProvider.primaryTextColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        notification.body,
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                height: 50,
+                width: 40,
+                //child: SvgPicture.asset(svgSrc),
+                child: Center(
+                    child: Icon(
+                      notification.type == 1 ? Icons.notifications:
+                      Icons.currency_bitcoin,
+                  color: theme,
+                  size: 50,
+                )),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        notification.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12,
-                          //color: ColorProvider.primaryTextColor.withOpacity(0.5),
-                          fontWeight: FontWeight.normal,
+                          fontSize: 15,
+                          //color: ColorProvider.primaryTextColor,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          notification.body,
+                          style: TextStyle(
+                            fontSize: 12,
+                            //color: ColorProvider.primaryTextColor.withOpacity(0.5),
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

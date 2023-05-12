@@ -41,7 +41,7 @@ class AccountRepository {
         break;
     }
     if(result.success){
-      setUserToLocal(_user);
+      await setUserToLocal(_user);
     }
     return result;
   }

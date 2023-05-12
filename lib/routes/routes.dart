@@ -1,6 +1,8 @@
 import 'package:et_job/screens/home/employee/apply.dart';
 import 'package:et_job/screens/home/employer/create_vacancy.dart';
+import 'package:et_job/screens/notifications/view_notification.dart';
 import 'package:et_job/screens/settings/setting.dart';
+import 'package:et_job/screens/wallet/withdraw.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -89,10 +91,25 @@ class AppRoute {
             args: argument,
           ));
     }
+    if (settings.name == WithdrawScreen.routeName) {
+      WithdrawScreenArgs argument = settings.arguments as WithdrawScreenArgs;
+      return MaterialPageRoute(
+          builder: (context) => WithdrawScreen(
+            args: argument,
+          ));
+    }
+
     if (settings.name == ApplyScreen.routeName) {
       ApplyArgs argument = settings.arguments as ApplyArgs;
       return MaterialPageRoute(
           builder: (context) => ApplyScreen(
+            args: argument,
+          ));
+    }
+    if (settings.name == ViewNTFS.routeName) {
+      NtfsDetailArgs argument = settings.arguments as NtfsDetailArgs;
+      return MaterialPageRoute(
+          builder: (context) => ViewNTFS(
             args: argument,
           ));
     }

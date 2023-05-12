@@ -20,6 +20,10 @@ class VacancyRepository {
   Future<Vacancies> fakeVacancies(DataTar dataTar) async{
     return SVacancies().getVacancies();
   }
+  Future<Vacancies> fakeSearch(DataTar dataTar, String query) async{
+    return SVacancies().searchVacancies(query);
+  }
+
   Future<Vacancies> myFakeVacancies(DataTar dataTar) async{
     return SVacancies().getVacancies();
   }

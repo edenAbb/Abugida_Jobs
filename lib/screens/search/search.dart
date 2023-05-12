@@ -45,26 +45,22 @@ class _UsersScreenState extends State<SearchScreen> {
   void initState() {
     themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     super.initState();
-    //_loadProfile();
-    _initDataRequest();
+    _loadProfile();
+    _initDataRequest("");
   }
-  _openProfile(){
-    Navigator.pushNamed(context, SettingScreen.routeName);
-  }
-
-  _initDataRequest() {
+  _initDataRequest(String query) {
     DataTar dataTar;
     dataTar = DataTar(itemId: 1,offset: 0);
-    context.read<VacancyCubit>().loadVacancies(dataTar);
+    context.read<VacancyCubit>().searchVacancy(dataTar,query);
   }
   var searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: JobsAppBar(key: _appBar, title: "Search", appBar: AppBar(), widgets: [
-        IconButton(onPressed: _openProfile,
-            icon: const Icon(Icons.settings))
-      ]),
+      // appBar: JobsAppBar(key: _appBar, title: "Search", appBar: AppBar(), widgets: [
+      //   IconButton(onPressed: _openProfile,
+      //       icon: const Icon(Icons.settings))
+      // ]),
       body: Stack(
         children: [
           Opacity(
@@ -101,70 +97,90 @@ class _UsersScreenState extends State<SearchScreen> {
               ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: searchController,
-                            decoration: InputDecoration(
-                                focusedBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.grey.shade100)),
-                                hintText: "write something",
-                                enabledBorder: InputBorder.none,
-                                labelStyle: const TextStyle(color: Colors.grey)),
-                            //validator: (value) => Sanitizer().isPhoneValid(value!),
-                            validator: (value) => Sanitizer().is3Length(value!),
-                            onSaved: (value) {
-                              //_user["phone"] = value;
+          Padding(
+            padding: const EdgeInsets.only(top: 25.0,right: 10),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(4.0),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: (){
+                              Navigator.pop(context);
                             },
+                              child: Icon(Icons.arrow_back,size: 40,)),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(5.0)
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: TextFormField(
+                                    controller: searchController,
+                                    decoration: InputDecoration(
+                                        focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(color: Colors.grey.shade100)),
+                                        hintText: "write something",
+                                        enabledBorder: InputBorder.none,
+                                        labelStyle: const TextStyle(color: Colors.grey)),
+                                    //validator: (value) => Sanitizer().isPhoneValid(value!),
+                                    validator: (value) => Sanitizer().is3Length(value!),
+                                    onSaved: (value) {
+                                      //_user["phone"] = value;
+                                    },
+                                    onChanged: (value){
+                                      if(value.length > 2){
+                                        _initDataRequest(value);
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        ElevatedButton(onPressed: (){}, child: Icon(Icons.search))
-                      ],
-                    ),
-                  ),
+                          GestureDetector(onTap: (){
+
+                          },
+                              child: Icon(Icons.search,size: 45))
+                        ],
+                      ),
                 ),
-              ),
-              SizedBox(
-                height: Device.deviceScreen(context) * 0.58 - Device.bottomNav(context),
-                child: BlocBuilder<VacancyCubit, VacancyState>(builder: (context, state) {
-                  if (state is LoadingVacancy) {
-                    return Align(
-                        alignment: Alignment.center,
-                        child: SizedBox(
-                          height: 50,
-                          width: 50,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: themeProvider.getColor,
-                          ),
-                        ));
-                  }
-                  if (state is VacancyLoadingFailed) {
-                    Session().logSession("VacancyLoadingFailed", state.error);
-                    if (state.error == 'end-session') {
-                      gotoSignIn(context);
-                    }
-                    return Center(child: Text(state.error));
-                  }
-                  if (state is VacancyLoaded) {
-                    Session().logSession(
-                        "ItemSize", state.vacancies.vacancies.length.toString());
-                    return vacancyHolder(state.vacancies.vacancies);
-                  }
-                  return const Center(child: Text("No Vacancy Available"));
-                }),
-              ),
-            ],
+                  Expanded(
+                    child: BlocBuilder<VacancyCubit, VacancyState>(builder: (context, state) {
+                      if (state is LoadingVacancy) {
+                        return Align(
+                            alignment: Alignment.center,
+                            child: SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: themeProvider.getColor,
+                              ),
+                            ));
+                      }
+                      if (state is VacancyLoadingFailed) {
+                        Session().logSession("VacancyLoadingFailed", state.error);
+                        if (state.error == 'end-session') {
+                          gotoSignIn(context);
+                        }
+                        return Center(child: Text(state.error));
+                      }
+                      if (state is VacancyLoaded) {
+                        Session().logSession(
+                            "ItemSize", state.vacancies.vacancies.length.toString());
+                        return vacancyHolder(state.vacancies.vacancies);
+                      }
+                      return const Center(child: Text("Search..."));
+                    }),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -197,7 +213,7 @@ class _UsersScreenState extends State<SearchScreen> {
           ),
       ],
     )
-        : const Center(child: Text("No Vacancy found"));
+        : const Center(child: Text("Search..."));
   }
   var proLoaded = false;
   late User user;

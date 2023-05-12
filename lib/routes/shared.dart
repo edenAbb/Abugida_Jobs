@@ -44,6 +44,10 @@ class RegisterScreenArgs {
 
   RegisterScreenArgs({required this.isOnline});
 }
+class WithdrawScreenArgs {
+  String amount;
+  WithdrawScreenArgs({required this.amount});
+}
 
 class ResetPasswordArgs {
   bool isSelected = false;

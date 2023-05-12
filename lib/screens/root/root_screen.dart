@@ -6,7 +6,7 @@ import 'package:et_job/screens/home/employer/dashboard.dart';
 import 'package:et_job/screens/home/employer/vacancies.dart';
 import 'package:et_job/screens/home/profile/employee.dart';
 import 'package:et_job/screens/home/profile/employer.dart';
-import 'package:et_job/screens/wallet/transactions.dart';
+import 'package:et_job/screens/wallet/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';

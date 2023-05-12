@@ -12,8 +12,8 @@ class VacancyCubit extends Cubit<VacancyState>{
   Future<void> loadVacancies(DataTar dataTar) async {
     emit(LoadingVacancy());
     try{
-      var vacancies = await vacancyRepository.loadVacancies(dataTar);
-      //var vacancies = await vacancyRepository.fakeVacancies(dataTar);
+      //var vacancies = await vacancyRepository.loadVacancies(dataTar);
+      var vacancies = await vacancyRepository.fakeVacancies(dataTar);
       emit(VacancyLoaded(vacancies: vacancies));
     }catch(e){
       emit(VacancyLoadingFailed(error: e.toString()));
@@ -22,13 +22,24 @@ class VacancyCubit extends Cubit<VacancyState>{
   Future<void> loadMyVacancies(DataTar dataTar) async {
     emit(LoadingVacancy());
     try{
-      var vacancies = await vacancyRepository.loadMyVacancies(dataTar);
+      //var vacancies = await vacancyRepository.loadMyVacancies(dataTar);
+      var vacancies = await vacancyRepository.myFakeVacancies(dataTar);
       emit(VacancyLoaded(vacancies: vacancies));
     }catch(e){
       emit(VacancyLoadingFailed(error: e.toString()));
     }
   }
 
+  Future<void> searchVacancy(DataTar dataTar, String query) async {
+    emit(LoadingVacancy());
+    try{
+      //var vacancies = await vacancyRepository.loadMyVacancies(dataTar);
+      var vacancies = await vacancyRepository.fakeSearch(dataTar,query);
+      emit(VacancyLoaded(vacancies: vacancies));
+    }catch(e){
+      emit(VacancyLoadingFailed(error: e.toString()));
+    }
+  }
   Future<void> updateVacancy(Vacancy vacancy) async {
     emit(UpdatingVacancy());
     try{

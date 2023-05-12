@@ -11,7 +11,7 @@ class AccountCubit extends Cubit<AccountState>{
   Future<void> login(Map<String, dynamic> user) async {
     emit(LoginOnProcess());
     try{
-      accountRepository.loginUser(user);
+      await accountRepository.loginUser(user);
       emit(LoginSuccessfully());
     }catch(e){
       emit(LoginFailed(error: e.toString()));
@@ -38,7 +38,7 @@ class AccountCubit extends Cubit<AccountState>{
   Future<void> logout() async {
     emit(LogoutOnProcess());
     try{
-      accountRepository.logOut();
+      await accountRepository.logOut();
       emit(LogoutSuccessfully());
     }catch(e){
       emit(LogoutFailed(error: e.toString()));

@@ -124,13 +124,13 @@ class _JobsScreenState extends State<JobsScreen> {
   late User user;
   var auth = AccountRepository(httpClient: http.Client());
 
-  _loadProfile() {
-    auth.getUserData().then((value) => {
+  _loadProfile() async {
+    await auth.getUserData().then((value) => {
       setState(() {
         user = value;
         proLoaded = true;
-        _initDataRequest();
-      })
+      }),
+    _initDataRequest()
     });
   }
 }

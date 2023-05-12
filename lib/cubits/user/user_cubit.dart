@@ -12,7 +12,8 @@ class UserCubit extends Cubit<UserState>{
   Future<void> loadUser(DataTar dataTar) async {
     emit(LoadingUser());
     try{
-      var users = await userRepository.loadUsers(dataTar);
+      //var users = await userRepository.loadUsers(dataTar);
+      var users = await userRepository.fakeUsers(dataTar);
       emit(UserLoaded(users: users));
     }catch(e){
       emit(UserLoadingFailed(error: e.toString()));

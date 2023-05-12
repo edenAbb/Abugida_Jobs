@@ -30,11 +30,20 @@ class _ViewNTFSState extends State<ViewNTFS> {
           appBar: AppBar(), widgets: []),
       body: Container(
         width: double.infinity,
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(
-            notification.body,
-            style: Theme.of(context).textTheme.headline3,
+        child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  notification.body,
+                  style: TextStyle(fontSize: 15),
+                ),
+            ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text((notification.date)),
+          )
         ]),
       ),
     );

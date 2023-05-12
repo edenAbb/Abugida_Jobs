@@ -12,7 +12,8 @@ class NotificationCubit extends Cubit<NotificationState>{
   Future<void> loadNotification(DataTar dataTar) async {
     emit(LoadingNotification());
     try{
-      var notification = await notificationRepository.loadNotifications();
+      //var notification = await notificationRepository.loadNotifications();
+      var notification = await notificationRepository.fakeNotifications(dataTar);
       emit(NotificationLoaded(notification: notification));
     }catch(e){
       emit(NotificationLoadingFailed(error: e.toString()));

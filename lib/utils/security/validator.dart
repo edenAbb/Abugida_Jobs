@@ -21,6 +21,10 @@ class Sanitizer{
       return "Please input Full name";
     }else if(name.length < 5){
       return "Please use valid name";
+    }else if(!RegExp(r'^[a-z]+$').hasMatch(name.split(' ')[0])){
+      return "Please use only letters";
+    }else if(!RegExp(r'^[a-z]+$').hasMatch(name.split(' ')[1])){
+      return "Please use only letters";
     }
     return null;
   }
@@ -29,6 +33,8 @@ class Sanitizer{
       return "Phone number required";
     }else if(phone.length < 10){
       return "Phone number length must not be less than 10";
+    }else if(!phone.startsWith("09")){
+      return "Invalid phone format! use 09... format";
     }
     return null;
   }
@@ -79,6 +85,25 @@ class Sanitizer{
     }
     return null;
   }
+  String? isBankAccountValid(String code){
+    if(code.isEmpty){
+      return "Please insert account number";
+    }else if(code.length < 10){
+      return "account number length must not be less than 10 digit";
+    }
+    return null;
+  }
+  String? canWithdraw(String balance, String amount){
+    if(amount.isEmpty){
+      return "Please insert amount";
+    }
+    double bal = double.parse(balance);
+    double amn = double.parse(amount);
+    return amn < bal + 100 ? null
+        : "Your balance is insufficient, please recharge";
+  }
+
+
   String? is3Length(String code){
     if(code.isEmpty){
       return "Please insert data";

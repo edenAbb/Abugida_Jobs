@@ -4,6 +4,8 @@ import 'package:et_job/cubits/user/user_state.dart';
 import 'package:et_job/cubits/wallet/wallet_cubit.dart';
 import 'package:et_job/cubits/wallet/wallet_state.dart';
 import 'package:et_job/models/transaction.dart';
+import 'package:et_job/routes/shared.dart';
+import 'package:et_job/screens/wallet/withdraw.dart';
 import 'package:et_job/screens/widgets/show_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -107,7 +109,7 @@ class _UsersScreenState extends State<WalletScreen> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Center(child: Text("Balance",
+                        child: Center(child: Text("3000.ETB",
                           style: TextStyle(fontSize: 25,color: Colors.white),),),
                       ),
                     ),
@@ -144,6 +146,9 @@ class _UsersScreenState extends State<WalletScreen> {
                             padding: const EdgeInsets.all(5.0),
                             child: ElevatedButton(onPressed: (){
                               ShowSnack(context,"To Withdrawal page").show();
+
+                              Navigator.pushNamed(context, WithdrawScreen.routeName,
+                                  arguments: WithdrawScreenArgs(amount: "3000"));
                             },
                                 child: Column(
                                   children: [
