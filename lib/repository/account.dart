@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:et_job/mock/users.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/user.dart';
 import '../services/api/account.dart';
@@ -47,6 +50,14 @@ class AccountRepository {
   }
 
   Future<Result> setUserToLocal(Map<String, dynamic> user) async {
+    if(user.containsKey('cv_as_pdf')){
+      Session().logSession("cv-as-pdf", user['cv_as_pdf'] ?? "");
+      String iPath = user.containsKey('cv_as_pdf')
+          ? user['cv_as_pdf'] : "";
+      await updateCVLocal(iPath);
+    }else{
+      Session().logSession("cv-as-pdf", "no active");
+    }
     await secureStorage.write(
         key: 'id', value: user.containsKey('id') ? user['id'].toString() : '0');
     await secureStorage.write(key: 'phone', value: user['phone']);
@@ -57,9 +68,10 @@ class AccountRepository {
         key: "email", value: user.containsKey('email') ? user['email'] : '');
     String iPath = user.containsKey('photo')
         ? user['photo'] : "";
-    await secureStorage.write(key: 'profile_image', value: await RequestHeader.getIp() + iPath);
+    await updateProfilePic(iPath);
     await secureStorage.write(key: "gender", value: user['gender'] ?? "");
     await secureStorage.write(key: "role", value: user['role'] ?? "");
+    await secureStorage.write(key: "cv_as_pdf", value: user['cv_as_pdf'] ?? "");
     await secureStorage.write(key: "wallet", value: user['wallet'] ?? "0");
 
     await secureStorage.write(key: "education", value: user['education'] ?? "Unavailable");
@@ -89,7 +101,7 @@ class AccountRepository {
       Map<String, dynamic> output = jsonDecode(response.body);
       if (output['code'] == "200") {
         // Session().logSession('url',output.toString());
-        setUserToLocal(output);
+        await setUserToLocal(output);
         return Result(response.statusCode.toString(),true,
             "Login Successful",getRole(output['role'] ?? 'guest'));
       } else {
@@ -124,7 +136,7 @@ class AccountRepository {
         output = jsonDecode(response.body);
         if (output['code'] == "200") {
           Session().logSession('url',output.toString());
-          setUserToLocal(output);
+          await setUserToLocal(output);
           return Result(response.statusCode.toString(),true, "Registration Successful",getRole(output['role'] ?? 'guest'));
         } else {
           return RequestResult()
@@ -143,7 +155,7 @@ class AccountRepository {
   }
 
   Future<Result> registerUser(Map<String, dynamic> user) async {
-    return isPhoneRegistered(user["phone"]).then((value) {
+    return await isPhoneRegistered(user["phone"]).then((value) {
       if (!value.success) {
         //Session().logSession('phone-check',value.message.toString())
         return startRegistration(user);
@@ -173,7 +185,7 @@ class AccountRepository {
     if (response.statusCode == 200) {
       Map<String, dynamic> output = jsonDecode(response.body);
       if (output['code'] == "200") {
-        setUserToLocal(output);
+        await setUserToLocal(output);
         return RequestResult()
             .requestResult(response.statusCode.toString(), "Update Successful");
       } else {
@@ -257,27 +269,79 @@ class AccountRepository {
     }
   }
 
-  Future<Result> uploadProfileImage(String photo) async {
-    final response = await http.post(
-      Uri.parse(await AccountApi.uploadProfileImage(await getPhone() ?? "")),
-      headers: await RequestHeader().defaultHeader(),
-      body: json.encode({
-        'photo': photo
-      }),
-    );
-    Session().logSession('url', response.statusCode.toString());
+  Future<Result> uploadProfileImage(XFile file) async {
+    final request = http.MultipartRequest(
+        'POST', Uri.parse(await AccountApi.uploadProfileImage(await getPhone() ?? "")));
+    request.headers['x-access-token'] = '${await RequestHeader().defaultHeader()}';
+    request.files.add(await http.MultipartFile.fromPath(
+      "photo",
+      file.path.toString(),
+      //contentType: MediaType('image', 'jpg'),
+    ));
+    final response = await request.send();
+
+
+    Session().logSession('url', await AccountApi.uploadProfileImage(await getPhone() ?? ""));
+
     if (response.statusCode == 200) {
-      Map<String, dynamic> output = jsonDecode(response.body);
-      if (output['code'] == "200") {
+
+      //Get the response from the server
+      var responseData = await response.stream.toBytes();
+      var responseString = String.fromCharCodes(responseData);
+      Session().logSession('url-upload', responseString);
+      Map<String, dynamic> output = jsonDecode(responseString);
+      if (output['code'] == 200) {
+        await updateProfilePic(output['profile_image']);
         return RequestResult()
-            .requestResult(response.statusCode.toString(), "Update Successful");
+            .requestResult(response.statusCode.toString(), output['message']);
       } else {
         return RequestResult()
             .requestResult(response.statusCode.toString(), output['message']);
       }
     } else {
       return RequestResult()
-          .requestResult(response.statusCode.toString(), response.body);
+          .requestResult(response.statusCode.toString(), "Unable to upload image");
+      // return RequestResult()
+      //     .requestResult(response.statusCode.toString(), response.body);
+    }
+  }
+  Future<Result> uploadCV(File file) async {
+    final request = http.MultipartRequest(
+        'POST', Uri.parse(await AccountApi.uploadCV(await getId() ?? "")));
+    request.headers['x-access-token'] = '${await RequestHeader().defaultHeader()}';
+    request.files.add(await http.MultipartFile.fromPath(
+      "file",
+      file.path.toString(),
+      //contentType: MediaType('image', 'jpg'),
+    ));
+    final response = await request.send();
+
+
+    Session().logSession('url', await AccountApi.uploadCV(await getId() ?? ""));
+    // var responseData = await response.stream.toBytes();
+    // var responseString = String.fromCharCodes(responseData);
+    // Session().logSession('url-upload', responseString);
+
+    if (response.statusCode == 200) {
+
+      //Get the response from the server
+      var responseData = await response.stream.toBytes();
+      var responseString = String.fromCharCodes(responseData);
+      Session().logSession('url-upload', responseString);
+      Map<String, dynamic> output = jsonDecode(responseString);
+      if (output['code'] == 200) {
+        await updateCVLocal(output['cv_as_pdf']);
+        return RequestResult()
+            .requestResult(response.statusCode.toString(), output['message']);
+      } else {
+        return RequestResult()
+            .requestResult(response.statusCode.toString(), output['message']);
+      }
+    } else {
+      return RequestResult()
+          .requestResult(response.statusCode.toString(), "Unable to upload pdf");
+      // return RequestResult()
+      //     .requestResult(response.statusCode.toString(), response.body);
     }
   }
 
@@ -293,8 +357,17 @@ class AccountRepository {
   }
 
   Future updateProfilePic(String url) async {
+    var imageUrl = await RequestHeader.getIp() + "users/getProfileImage/" + url;
+    Session().logSession("imageUrl", imageUrl);
     await secureStorage.write(
-        key: 'profile_image', value: await RequestHeader.getIp() + "profile/" + url);
+        key: 'profile_image', value: imageUrl);
+  }
+
+  Future updateCVLocal(String url) async {
+    var imageUrl = await RequestHeader.getIp() + "attachment/getCV/" + url;
+    Session().logSession("pdfUrl", imageUrl);
+    await secureStorage.write(
+        key: 'cv_as_pdf', value: imageUrl);
   }
 
   Future logOut() async {

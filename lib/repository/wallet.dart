@@ -140,6 +140,7 @@ class WalletRepository {
   Future<Transactions> sHistory(DataTar dataTar) async{
     return SWallets().getWalletHistory();
   }
+
   Future<Result> sRecharge(String amount) async{
     return SWallets().rechargeWallet();
   }

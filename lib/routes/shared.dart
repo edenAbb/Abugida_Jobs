@@ -74,5 +74,14 @@ class ApplyArgs {
   UserRole role;
   ApplyArgs({required this.vacancy, required this.role});
 }
+class UpdateVacancyArgs {
+  Vacancy vacancy;
+  UpdateVacancyArgs({required this.vacancy});
+}
+
+class ViewCVArgs {
+  String path;
+  ViewCVArgs({required this.path});
+}
 
 

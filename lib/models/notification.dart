@@ -3,7 +3,7 @@ class JNotification {
   String title;
   String body;
   String date;
-  int status;
+  int status;//1 unseen, 2 seen
   int type;
   JNotification(
       {required this.id,

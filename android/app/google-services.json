@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "788367055164",
+    "project_id": "push-me-6fc5d",
+    "storage_bucket": "push-me-6fc5d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:788367055164:android:61acf9b4a78626ca4ba639",
+        "android_client_info": {
+          "package_name": "com.edentech.et_job"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "788367055164-i60k76368qs73qqfiva92ebi6pkl4055.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.edentech.et_job",
+            "certificate_hash": "62e8e01534be87c480ca21e3771dd6875d3b5573"
+          }
+        },
+        {
+          "client_id": "788367055164-h991m9270777umsudi0n7gmqm2j0oo74.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYlmacw0-TejTGKgXdrWYqcdRADynHzpA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "788367055164-h991m9270777umsudi0n7gmqm2j0oo74.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "788367055164-jcot9h90tm2gq56e2jsiqr0fuphj2crj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.edentech.etJob"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:788367055164:android:08b961b9d96b69be4ba639",
+        "android_client_info": {
+          "package_name": "com.sirkuni.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "788367055164-n107d6fut0pvl0trrb6sb7ccnqcistv3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sirkuni.app",
+            "certificate_hash": "62e8e01534be87c480ca21e3771dd6875d3b5573"
+          }
+        },
+        {
+          "client_id": "788367055164-h991m9270777umsudi0n7gmqm2j0oo74.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYlmacw0-TejTGKgXdrWYqcdRADynHzpA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "788367055164-h991m9270777umsudi0n7gmqm2j0oo74.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "788367055164-jcot9h90tm2gq56e2jsiqr0fuphj2crj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.edentech.etJob"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -52,11 +52,31 @@ class VacancyRepository {
   }
   Future<Vacancies> loadMyVacancies(DataTar dataTar) async{
     final response = await http.get(
-      Uri.parse(await VacancyApi
-          .loadMyVacancies(await authDataProvider.getId()??"0")),
-      headers: await RequestHeader().authorisedHeader()
+        Uri.parse(await VacancyApi
+            .loadMyVacancies(await authDataProvider.getId()??"0")),
+        headers: await RequestHeader().authorisedHeader()
     );
     Session().logSession('url -> ',await VacancyApi.loadMyVacancies(await authDataProvider.getId() ?? "0"));
+    Session().logSession('url -> ',response.body.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> output = jsonDecode(response.body);
+      if(output['code'] == "200"){
+        List data = output['data'];
+        return Vacancies.fromJson(data);
+      }else{
+        List<Vacancy> vacancies = [];
+        return Vacancies.fromVacancy(vacancies);
+      }
+    } else {
+      throw 'Unable to load: ${response.statusCode}';
+    }
+  }
+  Future<Vacancies> searchVacancies(DataTar dataTar, String category, String query) async{
+    final response = await http.get(
+        Uri.parse(await VacancyApi.searchVacancies(category,query)),
+        headers: await RequestHeader().authorisedHeader()
+    );
+    Session().logSession('url -> ',await VacancyApi.searchVacancies(category,query));
     Session().logSession('url -> ',response.body.toString());
     if (response.statusCode == 200) {
       Map<String, dynamic> output = jsonDecode(response.body);
@@ -100,10 +120,36 @@ class VacancyRepository {
         return RequestResult().requestResult(response.statusCode.toString(), output['message']);
       }
     } else {
-      return RequestResult().requestResult(response.statusCode.toString(), response.body);
+      throw 'Unable to process your request';
+      return RequestResult().requestResult(response.statusCode.toString(),
+          "Unable to process your request");
     }
   }
-  Future<Result> updateVacancy(Vacancy vacancy) async{
+  String getStatus(Vacancy vacancy,int target){
+    var newVacancy = vacancy;
+    String status = vacancy.jobStatus;
+    switch(target){
+      case 1:
+        status = "open";
+        break;
+      case 2:
+        status = "closed";
+        break;
+      case 3:
+        status = "ongoing";
+        break;
+      case 4:
+        status = "complete";
+        break;
+      case 5:
+        status = "archive";
+        break;
+    }
+    //newVacancy.jobStatus = status;
+    return status;
+  }
+  Future<Result> updateVacancy(Vacancy vacancy, int target) async{
+    //Vacancy vacancy = getStatus(oldVacancy, target);
     final response = await http.post(
       Uri.parse(await VacancyApi.updateVacancy()),
       headers: await RequestHeader().defaultHeader(),
@@ -117,7 +163,7 @@ class VacancyRepository {
         'qualification': jQuaFromQua(vacancy.qualification),
         'experience': vacancy.experience,
         'endDate': vacancy.endDate,
-        'status': vacancy.jobStatus,
+        'status': getStatus(vacancy, target),
         'category': jCatFromCat(vacancy.jobCategory),
         'owner': await authDataProvider.getId(),
       }),
@@ -132,9 +178,131 @@ class VacancyRepository {
         return RequestResult().requestResult(response.statusCode.toString(), output['message']);
       }
     } else {
-      return RequestResult().requestResult(response.statusCode.toString(), response.body);
+      throw 'Unable to process your request';
+      return RequestResult().requestResult(response.statusCode.toString(),
+          "Unable to process your request");
     }
   }
+
+  Future<Result> applyForJob(Vacancy vacancy) async{
+    final response = await http.post(
+      Uri.parse(await VacancyApi.applyForJob()),
+      headers: await RequestHeader().defaultHeader(),
+      body: json.encode({
+        'vacId': vacancy.jobId,
+        'userId':await authDataProvider.getId(),
+        'ownerId': vacancy.user?.id ?? "",
+        'vacStatus': vacancy.jobStatus,
+        'ntfs': 1,
+        'ntfsTitle': "raw title",
+        'ntfsBBody': "raw body"
+      }),
+    );
+    Session().logSession('url -> ',await VacancyApi.applyForJob());
+    Session().logSession('url -> ',response.body.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> output = jsonDecode(response.body);
+      if(output['code'] == "200"){
+        return RequestResult().requestResult(response.statusCode.toString(),output['message']);
+      }else{
+        return RequestResult().requestResult(response.statusCode.toString(), output['message']);
+      }
+    } else {
+      throw 'Unable to process your request';
+      return RequestResult().requestResult(response.statusCode.toString(),
+          "Unable to process your request");
+    }
+  }
+  Future<Result> acceptRequest(Vacancy vacancy) async{
+    final response = await http.post(
+      Uri.parse(await VacancyApi.acceptRequest()),
+      headers: await RequestHeader().defaultHeader(),
+      body: json.encode({
+        'vacId': vacancy.jobId,
+        'userId':await authDataProvider.getId(),
+        'ownerId': vacancy.user?.id ?? "",
+        'vacStatus': vacancy.jobStatus,
+        'ntfs': 1,
+        'ntfsTitle': "raw title",
+        'ntfsBBody': "raw body"
+      }),
+    );
+    Session().logSession('url -> ',await VacancyApi.acceptRequest());
+    Session().logSession('url -> ',response.body.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> output = jsonDecode(response.body);
+      if(output['code'] == "200"){
+        return RequestResult().requestResult(response.statusCode.toString(),output['message']);
+      }else{
+        return RequestResult().requestResult(response.statusCode.toString(), output['message']);
+      }
+    } else {
+      throw 'Unable to process your request';
+      return RequestResult().requestResult(response.statusCode.toString(),
+          "Unable to process your request");
+    }
+  }
+  Future<Result> cancelProgress(Vacancy vacancy) async{
+    final response = await http.post(
+      Uri.parse(await VacancyApi.cancelProgress()),
+      headers: await RequestHeader().defaultHeader(),
+      body: json.encode({
+        'vacId': vacancy.jobId,
+        'userId': await authDataProvider.getId(),
+        'ownerId': vacancy.user?.id ?? "",
+        'vacStatus': vacancy.jobStatus,
+        'ntfs': 1,
+        'ntfsTitle': "raw title",
+        'ntfsBBody': "raw body"
+      }),
+    );
+    Session().logSession('url -> ',await VacancyApi.cancelProgress());
+    Session().logSession('url -> ',response.body.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> output = jsonDecode(response.body);
+      if(output['code'] == "200"){
+        return RequestResult().requestResult(response.statusCode.toString(),output['message']);
+      }else{
+        return RequestResult().requestResult(response.statusCode.toString(), output['message']);
+      }
+    } else {
+      throw 'Unable to process your request';
+      return RequestResult().requestResult(response.statusCode.toString(),
+          "Unable to process your request");
+    }
+  }
+  Future<Result> completeJob(Vacancy vacancy) async{
+    final response = await http.post(
+      Uri.parse(await VacancyApi.completeJob()),
+      headers: await RequestHeader().defaultHeader(),
+      body: json.encode({
+        'vacId': vacancy.jobId,
+        'userId':await authDataProvider.getId(),
+        'ownerId': vacancy.user?.id ?? "",
+        'vacStatus': vacancy.jobStatus,
+        'ntfs': 1,
+        'ntfsTitle': "raw title",
+        'ntfsBBody': "raw body"
+      }),
+    );
+    Session().logSession('url -> ',await VacancyApi.completeJob());
+    Session().logSession('url -> ',response.body.toString());
+    if (response.statusCode == 200) {
+      Map<String, dynamic> output = jsonDecode(response.body);
+      if(output['code'] == "200"){
+        return RequestResult().requestResult(response.statusCode.toString(),output['message']);
+      }else{
+        return RequestResult().requestResult(response.statusCode.toString(), output['message']);
+      }
+    } else {
+      throw 'Unable to process your request';
+      return RequestResult().requestResult(response.statusCode.toString(),
+          "Unable to process your request");
+    }
+  }
+
+
+
   Future<Result> removeVacancy(Vacancy vacancy) async{
     final response = await http.post(
       Uri.parse(await VacancyApi.deleteVacancy()),
@@ -149,7 +317,9 @@ class VacancyRepository {
         return RequestResult().requestResult(response.statusCode.toString(), output['message']);
       }
     } else {
-      return RequestResult().requestResult(response.statusCode.toString(), response.body);
+      throw 'Unable to process your request';
+      return RequestResult().requestResult(response.statusCode.toString(),
+          "Unable to process your request");
     }
   }
 

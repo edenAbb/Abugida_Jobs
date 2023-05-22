@@ -29,7 +29,7 @@ class JobsScreen extends StatefulWidget{
   State<JobsScreen> createState() => _JobsScreenState();
 }
 
-class _JobsScreenState extends State<JobsScreen> {
+class _JobsScreenState extends State<JobsScreen> with WidgetsBindingObserver {
   final _appBar = GlobalKey<FormState>();
   late ThemeProvider themeProvider;
 
@@ -39,6 +39,21 @@ class _JobsScreenState extends State<JobsScreen> {
     themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     super.initState();
   }
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _initDataRequest();
+    }
+  }
+
+
   _openProfile(){
     Navigator.pushNamed(context, SettingScreen.routeName);
   }
@@ -62,6 +77,7 @@ class _JobsScreenState extends State<JobsScreen> {
       ]),
       body: BlocBuilder<VacancyCubit, VacancyState>(builder: (context, state) {
         if (state is LoadingVacancy) {
+          Session().logSession("LoadingVacancy", "loading state");
           return Align(
               alignment: Alignment.center,
               child: SizedBox(
@@ -81,10 +97,11 @@ class _JobsScreenState extends State<JobsScreen> {
           return Center(child: Text(state.error));
         }
         if (state is VacancyLoaded) {
-          Session().logSession(
-              "ItemSize", state.vacancies.vacancies.length.toString());
+          Session().logSession("VacancyLoaded", state.vacancies.vacancies.length.toString());
           return vacancyHolder(state.vacancies.vacancies);
         }
+        Session().logSession("Vacancy", "@ idle state");
+        _initDataRequest();
         return const Center(child: Text("No Vacancy Available"));
       }),
     );

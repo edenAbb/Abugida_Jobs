@@ -30,15 +30,14 @@ class RequestHeader {
   static Future<String> getIp() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String ip = prefs.getString("server-ip") ?? "0";
-    return 'http://$ip/api/';
+    Session().logSession("host-ip", 'http://$ip:80/api/');
+    return 'http://$ip:80/api/';
   }
   static Future<String> getRawIp() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String ip = prefs.getString("server-ip") ?? "0";
-    return ip;
+    return 'http://$ip';
   }
-
-
 }
 
 class RequestResult {

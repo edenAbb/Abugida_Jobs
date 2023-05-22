@@ -8,6 +8,21 @@ import '../../models/user.dart';
 class WalletState{}
 class WalletInit extends WalletState{}
 
+class WalletBState{}
+class WalletBInit extends WalletBState{}
+
+class LoadingWalletBalance extends WalletBState{}
+class WalletBalanceLoaded extends WalletBState{
+  final String balance;
+  WalletBalanceLoaded({required this.balance});
+}
+class WalletBalanceLoadingFailed extends WalletBState{
+  final String error;
+  WalletBalanceLoadingFailed({required this.error});
+}
+
+
+
 class LoadingWalletHistory extends WalletState{}
 class WalletHistoryLoaded extends WalletState{
   final Transactions transactions;
@@ -17,6 +32,8 @@ class WalletHistoryLoadingFailed extends WalletState{
   final String error;
   WalletHistoryLoadingFailed({required this.error});
 }
+
+
 
 class RechargingWallet extends WalletState{}
 class WalletRechargedSuccessfully extends WalletState{}

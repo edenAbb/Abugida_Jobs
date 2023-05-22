@@ -84,6 +84,7 @@ class _VacanciesScreenState extends State<VacanciesScreen> {
               "ItemSize", state.vacancies.vacancies[0].toString());
           return vacancyHolder(state.vacancies.vacancies);
         }
+        _initDataRequest();
         return const Center(child: Text("No Vacancy Available"));
       })
     );

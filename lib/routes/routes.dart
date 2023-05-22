@@ -1,5 +1,6 @@
 import 'package:et_job/screens/home/employee/apply.dart';
 import 'package:et_job/screens/home/employer/create_vacancy.dart';
+import 'package:et_job/screens/home/employer/update_vacancy.dart';
 import 'package:et_job/screens/notifications/view_notification.dart';
 import 'package:et_job/screens/settings/setting.dart';
 import 'package:et_job/screens/wallet/withdraw.dart';
@@ -14,6 +15,7 @@ import '../screens/account/login.dart';
 import '../screens/account/register.dart';
 import '../screens/account/reset_password.dart';
 import '../screens/account/update_account.dart';
+import '../screens/home/profile/view_cv.dart';
 import '../screens/root/cubit/botttom_nav_cubit.dart';
 import '../screens/root/root_screen.dart';
 import '../screens/search/search.dart';
@@ -91,6 +93,13 @@ class AppRoute {
             args: argument,
           ));
     }
+    if (settings.name == ViewCVScreen.routeName) {
+      ViewCVArgs argument = settings.arguments as ViewCVArgs;
+      return MaterialPageRoute(
+          builder: (context) => ViewCVScreen(
+            args: argument,
+          ));
+    }
     if (settings.name == WithdrawScreen.routeName) {
       WithdrawScreenArgs argument = settings.arguments as WithdrawScreenArgs;
       return MaterialPageRoute(
@@ -106,6 +115,15 @@ class AppRoute {
             args: argument,
           ));
     }
+
+    if (settings.name == UpdateVacancyScreen.routeName) {
+      UpdateVacancyArgs argument = settings.arguments as UpdateVacancyArgs;
+      return MaterialPageRoute(
+          builder: (context) => UpdateVacancyScreen(
+            args: argument,
+          ));
+    }
+
     if (settings.name == ViewNTFS.routeName) {
       NtfsDetailArgs argument = settings.arguments as NtfsDetailArgs;
       return MaterialPageRoute(

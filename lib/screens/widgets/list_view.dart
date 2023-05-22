@@ -4,6 +4,7 @@ import 'package:et_job/models/notification.dart';
 import 'package:et_job/models/transaction.dart';
 import 'package:et_job/routes/shared.dart';
 import 'package:et_job/screens/notifications/view_notification.dart';
+import 'package:et_job/screens/widgets/show_dialog.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/user.dart';
@@ -512,58 +513,63 @@ class TransactionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.0),
       ),
       margin: const EdgeInsets.only(top: 5),
-      child: Container(
-        decoration: const BoxDecoration(
-          //color: ColorProvider.primaryDarkColor,
-          borderRadius: BorderRadius.all(
-            Radius.circular(15),
-          ),
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              height: 50,
-              width: 40,
-              //child: SvgPicture.asset(svgSrc),
-              child: Center(
-                  child: Icon(
-                    Icons.currency_bitcoin,
-                    color: Theme.of(context).primaryColor,
-                    size: 50,
-                  )),
+      child: GestureDetector(
+        onTap: (){
+          ShowMessage(context,transaction.title,transaction.body);
+        },
+        child: Container(
+          decoration: const BoxDecoration(
+            //color: ColorProvider.primaryDarkColor,
+            borderRadius: BorderRadius.all(
+              Radius.circular(15),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      transaction.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 15,
-                        //color: ColorProvider.primaryTextColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        transaction.body,
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                height: 50,
+                width: 40,
+                //child: SvgPicture.asset(svgSrc),
+                child: Center(
+                    child: Icon(
+                      Icons.currency_bitcoin,
+                      color: Theme.of(context).primaryColor,
+                      size: 50,
+                    )),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        transaction.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12,
-                          //color: ColorProvider.primaryTextColor.withOpacity(0.5),
-                          fontWeight: FontWeight.normal,
+                          fontSize: 15,
+                          //color: ColorProvider.primaryTextColor,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          transaction.body,
+                          style: TextStyle(
+                            fontSize: 12,
+                            //color: ColorProvider.primaryTextColor.withOpacity(0.5),
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

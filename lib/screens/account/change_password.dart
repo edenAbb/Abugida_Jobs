@@ -309,7 +309,8 @@ class _ChangePasswordState extends State<ChangePassword> {
       //   {
       //     ShowSnack(context, value.message).show()
       //   }
-      ShowSnack(context, value.message).show()
+      ShowSnack(context, value.message).show(),
+    Navigator.pop(context)
     })
         .onError((error, stackTrace) => {
       Session().logSession("login", "response $error"),

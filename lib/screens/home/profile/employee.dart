@@ -1,7 +1,17 @@
 
+import 'dart:io';
+
+import 'package:et_job/routes/shared.dart';
+import 'package:et_job/screens/home/profile/view_cv.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf_render/pdf_render_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:pspdfkit_flutter/pspdfkit.dart';
 
 import '../../../cubits/account/account_cubit.dart';
 import '../../../cubits/account/account_state.dart';
@@ -182,9 +192,19 @@ class _EmployeeProfileState extends State<EmployeeProfile> with TickerProviderSt
                             Center(
                                 child: ElevatedButton(
                                     onPressed: () {
-                                      ShowSnack(context,
-                                          "this feature is available soon")
-                                          .show();
+                                      if(state.user.cvAsPdf != null){
+                                        Session().logSession("attch",
+                                            state.user.cvAsPdf ?? "opps");
+
+
+                                        Navigator.pushNamed(context, ViewCVScreen.routeName,
+                                            arguments: ViewCVArgs(path: state.user.cvAsPdf!));
+                                        //viewPdf(state.user.cvAsPdf!);
+                                      }else{
+                                        ShowSnack(context,
+                                            "No Attachment found")
+                                            .show();
+                                      }
                                     },
                                     child: Text("View Files"))),
 
@@ -197,9 +217,10 @@ class _EmployeeProfileState extends State<EmployeeProfile> with TickerProviderSt
                             Center(
                                 child: ElevatedButton(
                                     onPressed: () {
-                                      ShowSnack(context,
-                                          "this feature is available soon")
-                                          .show();
+                                      // ShowSnack(context,
+                                      //     "this feature is available soon")
+                                      //     .show();
+                                      chooseFile();
                                     },
                                     child: Text("Upload Files")))
                           ],
@@ -218,6 +239,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> with TickerProviderSt
             ],
           );
         }
+
         return Container(child: Center(child: Text("Unabale to load data")));
       }
     )
@@ -255,5 +277,72 @@ class _EmployeeProfileState extends State<EmployeeProfile> with TickerProviderSt
     var item = ProfileMenuItem(icon:icon,title: title, subTitle: subTitle);
     return SettingMenuItem(theme: Theme.of(context).primaryColor,
         cat: 3, position: 2,menu: item);
+  }
+  Future<void> chooseFile() async {
+    // XFile? photo = (await ImagePicker.platform.getImage(source: ImageSource.gallery));
+    // if(photo != null){
+    //   BlocProvider.of<AccountCubit>(context).uploadProfilePhoto(photo);
+    // }
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      ShowSnack(context, "Please wait...").show();
+      File file = File(result.files.single.path!);
+      //BlocProvider.of<AccountCubit>(context).uploadCV(file);
+      var sender = AccountRepository(httpClient: http.Client());
+      var res = sender.uploadCV(file);
+      res.then((value) => {
+            ShowSnack(context, value.message).show(),
+      })
+          .onError((error, stackTrace) => {
+        Session().logSession("login", "response $error"),
+        ShowSnack(context, "$error.").show(),
+      });
+    } else {
+      // User canceled the picker
+    }
+  }
+  viewPdf(String path) async {
+    // The URL of the PDF you want to download.
+    final pdfUrl = 'https://pspdfkit.com/downloads/pspdfkit-flutter-quickstart-guide.pdf';
+
+    // Fetch the PDF from the URL.
+    final pdfResponse = await http.get(Uri.parse(path));
+
+    // Check the response status code. If it's not `200` (OK), throw an error.
+    if (pdfResponse.statusCode != 200) {
+      throw Exception('Failed to download PDF');
+    }
+
+    Directory tempDir = await getTemporaryDirectory();
+    final dirExists = await tempDir.exists();
+
+    if (!dirExists) {
+      await tempDir.create();
+    }
+
+    String tempPath = tempDir.path;
+
+    // Create a file to store the PDF.
+    final pdfFile = File('$tempPath/my-pdf.pdf');
+
+    // Write the PDF data to the file.
+    await pdfFile.writeAsBytes(pdfResponse.bodyBytes);
+
+    // Use the PSPDFKit `PdfViewer` to display the PDF document.
+    //final pdfDocument = await Pspdfkit.present(pdfFile.path);
+
+
+    return FutureBuilder<File>(
+      future: DefaultCacheManager().getSingleFile(
+          'https://github.com/espresso3389/flutter_pdf_render/raw/master/example/assets/hello.pdf'),
+      builder: (context, snapshot) => snapshot.hasData
+          ? PdfViewer.openFile(snapshot.data!.path)
+          : Container( /* placeholder */),
+    );
+
+
+    //return PdfViewer.openAsset('$tempPath/my-pdf.pdf');
   }
 }

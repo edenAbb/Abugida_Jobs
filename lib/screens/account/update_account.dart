@@ -3,6 +3,7 @@ import 'package:et_job/cubits/account/account_cubit.dart';
 import 'package:et_job/screens/account/change_password.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../cubits/account/account_state.dart';
 import '../../models/user.dart';
@@ -11,6 +12,7 @@ import '../../routes/shared.dart';
 import '../../utils/env/session.dart';
 import '../../utils/security/validator.dart';
 import '../../utils/theme/colors.dart';
+import '../settings/widgets/profile_image.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/circles.dart';
 import '../widgets/painter.dart';
@@ -75,7 +77,30 @@ class _UpdateAccountState extends State<UpdateAccount> {
             });
             ShowSnack(context,state.message).show();
             BlocProvider.of<AccountCubit>(context).loadProfile();
+            Navigator.pop(context);
           }
+
+          if (state is UploadingFailed) {
+            setState(() {
+              _onProcess = false;
+            });
+            Session().logSession("VacancyLoadingFailed", state.error);
+            ShowSnack(context,state.error).show();
+          }
+          if (state is UploadOnProcess) {
+            setState(() {
+              _onProcess = true;
+            });
+            ShowSnack(context,"Please wait...").show();
+          }
+          if (state is UploadedSuccessfully) {
+            setState(() {
+              _onProcess = false;
+            });
+            ShowSnack(context,state.message).show();
+            BlocProvider.of<AccountCubit>(context).loadProfile();
+          }
+
 
         },
         builder: (context,state){
@@ -122,11 +147,44 @@ class _UpdateAccountState extends State<UpdateAccount> {
                     child: ListView(
                       children: <Widget>[
                         Container(
+                          margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+                          width: 80,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor.withOpacity(0.7),
+                            shape: BoxShape.circle,
+                          ),
+                          child: GestureDetector(
+                            onTap: (){
+                              choosePhoto();
+                            },
+                            child: Center(
+                              child: SizedBox(
+                                //width: 100,
+                                //height: 100,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(3.0),
+                                  child: Column(
+                                    children: [
+                                      ProfileImage(
+                                          height: 60.0,
+                                          width: 60.0,
+                                          profileUrl: "${user.profileImage}"),
+                                      Text("Change",
+                                        style: TextStyle(color: Colors.white),)
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
                           decoration: BoxDecoration(
                               color: Colors.white,
                               //border: Border.all(color: Colors.grey),
                               borderRadius: BorderRadius.circular(10)),
-                          margin: const EdgeInsets.fromLTRB(20, 100, 20, 10),
+                          margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                           padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
                           child: Column(
                             children: <Widget>[
@@ -669,5 +727,12 @@ class _UpdateAccountState extends State<UpdateAccount> {
   }
   bool isEmployee(UserRole role){
     return role == UserRole.employee;
+  }
+
+  Future<void> choosePhoto() async {
+    XFile? photo = (await ImagePicker.platform.getImage(source: ImageSource.gallery));
+    if(photo != null){
+      BlocProvider.of<AccountCubit>(context).uploadProfilePhoto(photo!);
+    }
   }
 }

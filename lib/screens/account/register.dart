@@ -130,6 +130,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: Image.asset("assets/icons/icon.png"),
                             ),
                           ),
+                          Row(
+                            children: [
+                              Icon(Icons.legend_toggle,
+                                color: Theme.of(context).primaryColor,),
+                              Expanded(
+                                child: jobTopBar(context, "Looking for: ",
+                                    _dropDownItem(typeItems, _chosenTypeValue)),
+                              ),
+                            ],
+                          ),
                           TextFormField(
                             controller: userNameControl,
                             decoration: InputDecoration(
@@ -140,14 +150,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide: BorderSide(
                                         color: Colors.grey.shade100)),
-                                labelText: "Full name",
+                                labelText: _chosenTypeValue == "Jobs" ? "Full name" : "Company Name",
                                 enabledBorder: InputBorder.none,
                                 labelStyle:
-                                    const TextStyle(color: Colors.grey)),
+                                const TextStyle(color: Colors.grey)),
                             validator: (value) =>
-                                Sanitizer().isFullNameValid(value!),
+                            _chosenTypeValue == "Jobs" ? Sanitizer().isFullNameValid(value!):
+                            Sanitizer().is3Length(value!),
                           ),
+
                           TextFormField(
+                            keyboardType: const TextInputType.numberWithOptions(
+                                signed: true, decimal: true),
                             controller: phoneControl,
                             decoration: InputDecoration(
                                 icon: Icon(
@@ -237,7 +251,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             validator: (value) => Sanitizer()
                                 .isPasswordMatch(passwordControl.text, value!),
                           ),
-                          Row(
+                          _chosenTypeValue == 'Jobs' ? Row(
                             children: [
                               Icon(Icons.male,
                                 color: Theme.of(context).primaryColor,),
@@ -246,18 +260,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     _dropDownGItem(genders, _chosenGenderValue)),
                               ),
                             ],
-                          ),
-                          Row(
-                            children: [
-                              Icon(Icons.legend_toggle,
-                                color: Theme.of(context).primaryColor,),
-                              Expanded(
-                                child: jobTopBar(context, "Looking for: ",
-                                    _dropDownItem(typeItems, _chosenTypeValue)),
-                              ),
-                            ],
-                          ),
-
+                          ) : Container(),
                         ],
                       ),
                     ),
@@ -440,6 +443,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       onChanged: (String? value) {
         setState(() {
           _chosenTypeValue = value!;
+          Session().logSession("chhosen", _chosenTypeValue);
         });
       },
     );

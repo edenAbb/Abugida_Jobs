@@ -10,7 +10,7 @@ class User {
   String phoneNumber;
   String? gender;
   String? profileImage;
-  String? fcm;
+  String? cvAsPdf;
   String? token;
   UserRole role;
   String education;
@@ -25,7 +25,7 @@ class User {
         required this.phoneNumber,
         this.gender,
         this.profileImage,
-        this.fcm,
+        this.cvAsPdf,
         this.token,
         required this.role,
         required this.education,
@@ -42,7 +42,7 @@ class User {
         gender: json.containsKey('gender') ? json["gender"] : "",
         phoneNumber: json.containsKey('phone') ? json["phone"] : "",
         profileImage: json.containsKey('profile_image') ? json["profile_image"] : "",
-        fcm: json.containsKey('fcm_id') ? json['fcm_id'] : "",
+        cvAsPdf: json.containsKey('cv_as_pdf') ? json['cv_as_pdf'] : "",
         token: json.containsKey('token') ? json['token'] : "",
         role: json.containsKey('role') ? getRole(json['role']) : UserRole.guest,
         education: json.containsKey('education') ? json['education'] : "Unavailable",
@@ -60,7 +60,7 @@ class User {
         gender: storage.containsKey('gender') ? storage["gender"] : "",
         phoneNumber: storage.containsKey('phone') ? storage["phone"] : "",
         profileImage: storage.containsKey('profile_image') ? storage["profile_image"] : "",
-        fcm: storage.containsKey('fcm_id') ? storage['fcm_id'] : "",
+        cvAsPdf: storage.containsKey('cv_as_pdf') ? storage['cv_as_pdf'] : "",
         token: storage.containsKey('token') ? storage['token'] : "",
         role: storage.containsKey('role') ? getRole(storage['role']) : UserRole.guest,
         education: storage.containsKey('education') ? storage['education'] :  "Unavailable",

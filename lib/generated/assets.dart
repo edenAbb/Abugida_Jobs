@@ -2,12 +2,12 @@
 class Assets {
   Assets._();
 
-  static const String iconsIcons-employee = 'assets/icons/icons-employee.png';
-  static const String iconsIcons-job-search = 'assets/icons/icon.png';
-  static const String iconsIcons-jobs = 'assets/icons/icons-jobs.png';
-  static const String iconsIcons-users = 'assets/icons/icons-users.png';
-  static const String iconsIcons-vacancy = 'assets/icons/icons-vacancy.png';
+  static const String employee = 'assets/icons/icons-employee.png';
+  static const String search = 'assets/icons/icon.png';
+  static const String jobs = 'assets/icons/icons-jobs.png';
+  static const String users = 'assets/icons/icons-users.png';
+  static const String vacancy = 'assets/icons/icons-vacancy.png';
   static const String translationsAm = 'assets/translations/am.json';
-  static const String translationsEn-US = 'assets/translations/en-US.json';
+  static const String translationsEnUS = 'assets/translations/en-US.json';
 
 }

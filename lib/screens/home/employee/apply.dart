@@ -1,6 +1,7 @@
 import 'package:et_job/models/job.dart';
 import 'package:et_job/models/user.dart';
 import 'package:et_job/routes/shared.dart';
+import 'package:et_job/screens/home/employer/update_vacancy.dart';
 import 'package:et_job/screens/widgets/list_view.dart';
 import 'package:et_job/screens/widgets/show_dialog.dart';
 import 'package:et_job/screens/widgets/show_toast.dart';
@@ -28,11 +29,13 @@ class _ApplyScreenState extends State<ApplyScreen> {
   final _appBar = GlobalKey<FormState>();
   late ThemeProvider themeProvider;
   late Vacancy vacancy;
+  late String vacStat;
   @override
   void initState() {
     themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     super.initState();
     vacancy = widget.args.vacancy;
+    vacStat = vacancy.jobStatus;
   }
   _openProfile(){
     Navigator.pushNamed(context, SettingScreen.routeName);
@@ -50,6 +53,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
             if (state is VacancyUpdatingFailed) {
               setState(() {
                 _onProcess = false;
+                vacancy.jobStatus = vacStat;
               });
               Session().logSession("VacancyLoadingFailed", state.error);
               ShowSnack(context,state.error).show();
@@ -61,6 +65,30 @@ class _ApplyScreenState extends State<ApplyScreen> {
               ShowSnack(context,"Please wait...").show();
             }
             if (state is VacancyUpdatedSuccessfully) {
+              Session().logSession("VacancyUpdatedSuccessfully", state.message);
+              setState(() {
+                _onProcess = false;
+                vacancy.jobStatus = vacStat;
+              });
+              ShowSnack(context,state.message).show();
+              //Navigator.of(context).pop();
+              //DataTar dataTar = DataTar(itemId: 2,offset: 0);
+              //=BlocProvider.of<VacancyCubit>(context).loadMyVacancies(dataTar);
+            }
+            if (state is ApplyingVacancyFailed) {
+              setState(() {
+                _onProcess = false;
+              });
+              Session().logSession("VacancyLoadingFailed", state.error);
+              ShowSnack(context,state.error).show();
+            }
+            if (state is ApplyingVacancy) {
+              setState(() {
+                _onProcess = true;
+              });
+              ShowSnack(context,"Please wait...").show();
+            }
+            if (state is AppliedSuccessfully) {
               setState(() {
                 _onProcess = false;
               });
@@ -69,7 +97,6 @@ class _ApplyScreenState extends State<ApplyScreen> {
               //DataTar dataTar = DataTar(itemId: 2,offset: 0);
               //BlocProvider.of<VacancyCubit>(context).loadMyVacancies(dataTar);
             }
-
           },
           builder: (context,state){
             return SizedBox(
@@ -171,7 +198,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
                 color: Colors.transparent,
                 child: ElevatedButton(
                   onPressed: () {
-                    applyForJob(context, vacancy);
+                    editVacancy(context, vacancy);
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -239,31 +266,38 @@ class _ApplyScreenState extends State<ApplyScreen> {
               ],
             ),
           ),
+
           vacancy.jobStatus == "open" ?
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // Material(
-                //   borderRadius: BorderRadius.circular(15),
-                //   color: Colors.transparent,
-                //   child: ElevatedButton(
-                //     style: ButtonStyle(
-                //         backgroundColor: MaterialStateProperty.all(Colors.green)),
-                //     onPressed: () {
-                //       applyForJob(context, vacancy);
-                //     },
-                //     child: Row(
-                //       ///mainAxisAlignment: MainAxisAlignment.center,
-                //       children: const [
-                //         //Spacer(),
-                //         Text("Approve", style: TextStyle(color: Colors.white)),
-                //         //Spacer()
-                //       ],
-                //     ),
-                //   ),
-                // ),
+                Expanded(
+                  child: SizedBox(
+                    height: 45,
+                    child: Material(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.transparent,
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(Colors.green)),
+                        onPressed: () {
+                          editVacancy(context, vacancy);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            //Spacer(),
+                            Text("Edit", style: TextStyle(color: Colors.white)),
+                            //Spacer()
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 5),
                 Expanded(
                   child: SizedBox(
                     height: 45,
@@ -275,7 +309,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
                             backgroundColor:
                             MaterialStateProperty.all(Colors.orange)),
                         onPressed: () {
-                          publishVacancy(context, vacancy,2);
+                          updateVacancy(context, vacancy,2);
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -298,7 +332,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all(Colors.red)),
                         onPressed: () {
-                          publishVacancy(context, vacancy, 5);
+                          updateVacancy(context, vacancy, 5);
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -318,25 +352,56 @@ class _ApplyScreenState extends State<ApplyScreen> {
               : vacancy.jobStatus == "closed" ?
           Padding(
             padding: const EdgeInsets.all(10),
-            child: SizedBox(
-              height: 50,
-              child: Material(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.transparent,
-                child: ElevatedButton(
-                  onPressed: (){
-                    publishVacancy(context, vacancy,1);
-                 },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Spacer(),
-                      Text("Publish", style: TextStyle(color: Colors.white)),
-                      Spacer()
-                    ],
+            child: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 45,
+                    child: Material(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.transparent,
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(Colors.green)),
+                        onPressed: () {
+                          editVacancy(context, vacancy);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            //Spacer(),
+                            Text("Edit", style: TextStyle(color: Colors.white)),
+                            //Spacer()
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                SizedBox(width: 5),
+                Expanded(
+                  child: SizedBox(
+                    height: 45,
+                    child: Material(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.transparent,
+                      child: ElevatedButton(
+                        onPressed: (){
+                          updateVacancy(context, vacancy,1);
+                       },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Spacer(),
+                            Text("Publish", style: TextStyle(color: Colors.white)),
+                            Spacer()
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           )
               : vacancy.jobStatus == "ongoing" ?
@@ -376,7 +441,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
                 color: Colors.transparent,
                 child: ElevatedButton(
                   onPressed: (){
-                    publishVacancy(context, vacancy,5);
+                    updateVacancy(context, vacancy,5);
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -391,7 +456,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
             ),
           ):
             vacancy.jobStatus == "archived" ?
-            Padding(
+          Padding(
               padding: const EdgeInsets.all(10),
               child: SizedBox(
                 height: 50,
@@ -400,7 +465,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
                   color: Colors.transparent,
                   child: ElevatedButton(
                     onPressed: (){
-                      publishVacancy(context, vacancy,1);
+                      updateVacancy(context, vacancy,1);
                       ShowSnack(context,"Reopening is disabled for moment").show();
                     },
                     child: Row(
@@ -464,7 +529,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all(Colors.green)),
                         onPressed: () {
-                          applyForJob(context, vacancy);
+                          editVacancy(context, vacancy);
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -489,7 +554,7 @@ class _ApplyScreenState extends State<ApplyScreen> {
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all(Colors.redAccent)),
                         onPressed: () {
-                          applyForJob(context, vacancy);
+                          editVacancy(context, vacancy);
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -550,37 +615,6 @@ class _ApplyScreenState extends State<ApplyScreen> {
         ],
       ),
     );
-  }
-
-  void applyForJob(BuildContext context, Vacancy vacancy){
-    ShowMessage(context,"Apply","Thanks, We will let you know the result");
-  }
-  void publishVacancy(BuildContext context, Vacancy vacancy, int target){
-    String status = vacancy.jobStatus;
-    switch(target){
-      case 1:
-        status = "open";
-        break;
-      case 2:
-        status = "closed";
-        break;
-      case 3:
-        status = "ongoing";
-        break;
-      case 4:
-        status = "complete";
-        break;
-      case 5:
-        status = "archive";
-        break;
-    }
-    vacancy.jobStatus = status;
-    ShowSnack(context,"This feature is not available for moment").show();
-    if(!_onProcess){
-      //BlocProvider.of<VacancyCubit>(context).updateVacancy(vacancy);
-    }else{
-
-    }
   }
 
   Widget jobProperties(
@@ -695,4 +729,21 @@ class _ApplyScreenState extends State<ApplyScreen> {
         return "Any";
     }
   }
+
+
+
+  void editVacancy(BuildContext context, Vacancy vacancy){
+    Navigator.pushNamed(context, UpdateVacancyScreen.routeName,
+        arguments: UpdateVacancyArgs(vacancy: vacancy));
+      //ShowSnack(context,"To Editing Screen").show();
+  }
+  void updateVacancy(BuildContext context, Vacancy vacancy, int target){
+    if(!_onProcess){
+      vacStat = vacancy.jobStatus;
+      BlocProvider.of<VacancyCubit>(context).updateVacancy(vacancy,target);
+    }else{
+      ShowSnack(context,"Please wait...").show();
+    }
+  }
+
 }

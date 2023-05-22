@@ -20,6 +20,7 @@ import '../../../utils/theme/theme_provider.dart';
 
 import 'package:http/http.dart' as http;
 
+import '../../cubits/wallet/wallet_b_cubit.dart';
 import '../root/root_screen.dart';
 import '../settings/setting.dart';
 import '../widgets/app_bar.dart';
@@ -53,8 +54,10 @@ class _UsersScreenState extends State<WalletScreen> {
   _initDataRequest() {
     DataTar dataTar;
     dataTar = DataTar(offset: 0);
-    context.read<WalletCubit>().loadWalletHistory(dataTar);
+    BlocProvider.of<WalletCubit>(context).loadWalletHistory(dataTar);
+    BlocProvider.of<WalletBCubit>(context).loadWalletBalance();
   }
+  bool bLoading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,68 +106,93 @@ class _UsersScreenState extends State<WalletScreen> {
             children: [
               SizedBox(
                 height: Device.deviceScreen(context) * 0.2,
-                child: Container(
-                  color: Theme.of(context).primaryColor.withOpacity(0.5),
-                  child: Column(children: [
-                    Expanded(
-                      child: Padding(
+                child: BlocBuilder<WalletBCubit, WalletBState>(builder: (context, state) {
+                if (state is LoadingWalletBalance) {
+                  return Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: themeProvider.getColor,
+                        ),
+                      ));
+                }
+                if (state is WalletBalanceLoadingFailed) {
+                  Session().logSession("VacancyLoadingFailed", state.error);
+                  if (state.error == 'end-session') {
+                    gotoSignIn(context);
+                  }
+                  return Center(child: Text(state.error));
+                }
+                if (state is WalletBalanceLoaded) {
+                  return Container(
+                    color: Theme.of(context).primaryColor.withOpacity(0.5),
+                    child: Column(children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(child: Text(state.balance,
+                            style: TextStyle(fontSize: 25,color: Colors.white),),),
+                        ),
+                      ),
+                      Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Center(child: Text("3000.ETB",
-                          style: TextStyle(fontSize: 25,color: Colors.white),),),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: ElevatedButton(onPressed: (){
-                              ShowSnack(context,"Redirect To Chapa Payment").show();
-                            },
-                                child: Column(
-                                  children: [
-                                    Icon(Icons.arrow_downward,size: 40,),
-                                    Text("Recharge",style: TextStyle(fontSize: 10),),
-                                  ],
-                                )),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: ElevatedButton(onPressed: (){
-                              ShowSnack(context,"Refresh Balance").show();
-                            },
-                                child: Column(
-                                  children: [
-                                    Icon(Icons.refresh,size: 40,),
-                                    Text("Refresh",style: TextStyle(fontSize: 10),),
-                                  ],
-                                )),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: ElevatedButton(onPressed: (){
-                              ShowSnack(context,"To Withdrawal page").show();
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: ElevatedButton(onPressed: (){
+                                ShowSnack(context,"Redirect To Chapa Payment").show();
+                              },
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.arrow_downward,size: 40,),
+                                      Text("Recharge",style: TextStyle(fontSize: 10),),
+                                    ],
+                                  )),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: ElevatedButton(onPressed: (){
+                                BlocProvider.of<WalletBCubit>(context).loadWalletBalance();
+                                //ShowSnack(context,"Refresh Balance").show();
+                              },
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.refresh,size: 40,),
+                                      Text("Refresh",style: TextStyle(fontSize: 10),),
+                                    ],
+                                  )),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: ElevatedButton(onPressed: (){
+                                ShowSnack(context,"To Withdrawal page").show();
 
-                              Navigator.pushNamed(context, WithdrawScreen.routeName,
-                                  arguments: WithdrawScreenArgs(amount: "3000"));
-                            },
-                                child: Column(
-                                  children: [
-                                    Icon(Icons.arrow_upward,size: 40,),
-                                    Text("Withdraw",style: TextStyle(fontSize: 10),),
-                                  ],
-                                )),
-                          ),
+                                Navigator.pushNamed(context, WithdrawScreen.routeName,
+                                    arguments: WithdrawScreenArgs(amount: "3000"));
+                              },
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.arrow_upward,size: 40,),
+                                      Text("Withdraw",style: TextStyle(fontSize: 10),),
+                                    ],
+                                  )),
+                            ),
 
 
-                        ],
+                          ],
 
-                      ),
-                    )
-                  ],),
-                ),
+                        ),
+                      )
+                    ],)
+                    );
+                }
+                return const Center(child: Text("No Transaction Available"));
+              }),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),

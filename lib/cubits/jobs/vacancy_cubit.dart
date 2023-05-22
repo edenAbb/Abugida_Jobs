@@ -40,10 +40,10 @@ class VacancyCubit extends Cubit<VacancyState>{
       emit(VacancyLoadingFailed(error: e.toString()));
     }
   }
-  Future<void> updateVacancy(Vacancy vacancy) async {
+  Future<void> updateVacancy(Vacancy vacancy, int target) async {
     emit(UpdatingVacancy());
     try{
-      var result = await vacancyRepository.updateVacancy(vacancy);
+      var result = await vacancyRepository.updateVacancy(vacancy,target);
       emit(VacancyUpdatedSuccessfully(message: result.message));
     }catch(e){
       emit(VacancyUpdatingFailed(error: e.toString()));
@@ -66,6 +66,44 @@ class VacancyCubit extends Cubit<VacancyState>{
       emit(VacancyRemovedSuccessfully(message: result.message));
     }catch(e){
       emit(RemovingVacancyFailed(error: e.toString()));
+    }
+  }
+
+
+  Future<void> applyVacancy(Vacancy vacancy) async {
+    emit(ApplyingVacancy());
+    try{
+      var result = await vacancyRepository.applyForJob(vacancy);
+      emit(AppliedSuccessfully(message: result.message));
+    }catch(e){
+      emit(ApplyingVacancyFailed(error: e.toString()));
+    }
+  }
+  Future<void> acceptVacancy(Vacancy vacancy) async {
+    emit(AcceptingVacancy());
+    try{
+      var result = await vacancyRepository.acceptRequest(vacancy);
+      emit(AcceptedSuccessfully(message: result.message));
+    }catch(e){
+      emit(AcceptingVacancyFailed(error: e.toString()));
+    }
+  }
+  Future<void> cancelVacancy(Vacancy vacancy) async {
+    emit(CancelingVacancy());
+    try{
+      var result = await vacancyRepository.cancelProgress(vacancy);
+      emit(CanceledSuccessfully(message: result.message));
+    }catch(e){
+      emit(CancelingVacancyFailed(error: e.toString()));
+    }
+  }
+  Future<void> completeVacancy(Vacancy vacancy) async {
+    emit(CompletingVacancy());
+    try{
+      var result = await vacancyRepository.completeJob(vacancy);
+      emit(CompletedSuccessfully(message: result.message));
+    }catch(e){
+      emit(CompletingVacancyFailed(error: e.toString()));
     }
   }
 

@@ -16,33 +16,42 @@ import '../../settings/setting.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/show_toast.dart';
 
-class CreateVacancyScreen extends StatefulWidget{
-  static const routeName = "/create_vacancy";
-  const CreateVacancyScreen({Key? key}) : super(key: key);
+class UpdateVacancyScreen extends StatefulWidget{
+  static const routeName = "/update_vacancy";
+  final UpdateVacancyArgs args;
+  const UpdateVacancyScreen({Key? key, required this.args}) : super(key: key);
 
   @override
-  State<CreateVacancyScreen> createState() => _CreateVacancyScreenState();
+  State<UpdateVacancyScreen> createState() => _UpdateVacancyScreenState();
 }
 
-class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
+class _UpdateVacancyScreenState extends State<UpdateVacancyScreen> {
   final _appBar = GlobalKey<FormState>();
   late ThemeProvider themeProvider;
   bool _onProcess = false;
   final titleController = TextEditingController();
+  final descController = TextEditingController();
+  final locationController = TextEditingController();
+  final experienceController = TextEditingController();
+  late Vacancy vacancy;
   @override
   void initState() {
     themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    vacancy = widget.args.vacancy;
+
     super.initState();
   }
   _openProfile(){
     Navigator.pushNamed(context, SettingScreen.routeName);
   }
+  initPlaceHolder(Vacancy vacancy){
 
+  }
   final _createFormKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: JobsAppBar(key: _appBar, title: "Create Vacancy", appBar: AppBar(), widgets: [
+      appBar: JobsAppBar(key: _appBar, title: "Update Vacancy", appBar: AppBar(), widgets: [
         IconButton(onPressed: _openProfile,
             icon: const Icon(Icons.settings))
       ]),
@@ -52,7 +61,7 @@ class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
               setState(() {
                 _onProcess = false;
               });
-              Session().logSession("VacancyLoadingFailed", state.error);
+              Session().logSession("VacancyUpdatingFailed", state.error);
               ShowSnack(context,state.error).show();
             }
             if (state is UpdatingVacancy) {
@@ -110,35 +119,35 @@ class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: formField(titleController, "Vacancy Title",Icons.title),
+                            child: formField(titleController, vacancy.jobTitle,Icons.title),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: formField(titleController, "Description", Icons.info),
+                            child: formField(descController, vacancy.jobDescription, Icons.info),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: jobTopBar(context, "Job Type: ",
-                                _dropDownType(typeItems, _chosenTypeValue)),
+                                _dropDownType(typeItems, getJobType(vacancy.jobType))),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: jobTopBar(context, "Environment: ",
-                                _dropDownEnvironment(envItems, _chosenEnvValue)),
+                                _dropDownEnvironment(envItems, getJobEnvironment(vacancy.jobEnvironment))),
                           ),
 
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: jobTopBar(context, "Qualification: ",
-                                _dropDownEducation(requirementItems, _chosenRequirementValue)),
+                                _dropDownEducation(requirementItems, getRequirement(vacancy.qualification))),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: formField(titleController, "Location", Icons.location_pin),
+                            child: formField(locationController, vacancy.jobLocation, Icons.location_pin),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: formField(titleController, "Experience", Icons.location_pin),
+                            child: formField(experienceController, "Experience", Icons.location_pin),
                           ),
 
                           Padding(
@@ -154,13 +163,27 @@ class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
                                       : () {
                                     final _form = _createFormKey.currentState;
                                     if (_form!.validate()) {
-                                      _form.save();}
+                                      _form.save();
+                                      var vacancy = Vacancy(
+                                          jobId: "0",
+                                          jobTitle: titleController.text,
+                                          jobDescription: descController.text,
+                                          jobType: jTypeFromString(_chosenTypeValue),
+                                          jobEnvironment: jEnvFromString(_chosenEnvValue),
+                                          jobLocation: locationController.text,
+                                          qualification: jQuaFromString(_chosenRequirementValue),
+                                          experience: experienceController.text,
+                                          endDate: "endDate",
+                                          jobStatus: "open",
+                                          jobCategory: jCatFromString(_chosenCategoryValue));
+                                      updateVacancy(context, vacancy,1);
+                                    }
                                   },
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: const [
                                       Spacer(),
-                                      Text("Publish", style: TextStyle(color: Colors.white)),
+                                      Text("Update", style: TextStyle(color: Colors.white)),
                                       Spacer()
                                     ],
                                   ),
@@ -183,9 +206,6 @@ class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
     );
   }
 
-  void applyForJob(BuildContext context, Vacancy vacancy){
-    ShowMessage(context,"Apply","Thanks, We will let you know the result");
-  }
 
   Widget jobProperties(
       BuildContext context, IconData icon, String name, String value) {
@@ -230,6 +250,7 @@ class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
     );
   }
   Widget formField(TextEditingController controller, String hint, IconData iconData){
+    controller.text = hint != "Experience" ? hint : vacancy.experience;
     return Container(
       decoration: const BoxDecoration(boxShadow: [
         BoxShadow(
@@ -461,4 +482,12 @@ class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
     );
   }
 
+  void updateVacancy(BuildContext context, Vacancy vacancy, int target){
+    if(!_onProcess){
+      //vacStat = vacancy.jobStatus;
+      BlocProvider.of<VacancyCubit>(context).updateVacancy(vacancy,target);
+    }else{
+      ShowSnack(context,"Please wait...").show();
+    }
+  }
 }

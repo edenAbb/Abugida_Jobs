@@ -33,6 +33,10 @@ class AccountApi{
     return '${await RequestHeader.getIp()}users/uploadProfileImage/$id';
   }
 
+  static Future<String> uploadCV(String id) async {
+    return '${await RequestHeader.getIp()}attachment/uploadCV/$id';
+  }
+
   static Future<String> logout() async {
     return '${await RequestHeader.getIp()}auth/logout';
   }

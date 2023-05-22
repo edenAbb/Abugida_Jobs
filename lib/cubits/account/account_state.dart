@@ -19,6 +19,19 @@ class UpdatingFailed extends AccountState{
   UpdatingFailed({required this.error});
 }
 
+class UploadOnProcess extends AccountState{}
+class UploadedSuccessfully extends AccountState{
+  final String message;
+  UploadedSuccessfully({required this.message});
+}
+class UploadingFailed extends AccountState{
+  final String error;
+  UploadingFailed({required this.error});
+}
+
+
+
+
 class LogoutOnProcess extends AccountState{}
 class LogoutSuccessfully extends AccountState{}
 class LogoutFailed extends AccountState{

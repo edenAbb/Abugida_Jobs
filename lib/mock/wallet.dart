@@ -8,7 +8,7 @@ class SWallets{
     return Result("200", true, "Wallet Recharged", UserRole.guest);
   }
   Result getWalletBalance(){
-    return Result("200", true, "Wallet Recharged", UserRole.guest);
+    return Result("200", true, "3000", UserRole.guest);
   }
   Result withdraw(){
     return Result("200", true, "Wallet Recharged", UserRole.guest);

@@ -1,6 +1,7 @@
 
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -36,6 +37,8 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   final _forgetFormKey = GlobalKey<FormState>();
   late StreamSubscription _connectionChangeStream;
   bool isOffline = false;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
   void initState() {
     _onProcess = false;
@@ -248,7 +251,43 @@ class _ForgetPasswordState extends State<ForgetPassword> {
     });
   }
   void toConfirmScreen(String phone){
-    Navigator.pushNamed(context, ConfirmCode.routeName,
-        arguments: ConfirmCodeArgs(phone: phone));
+     Navigator.pushNamed(context, ConfirmCode.routeName,
+         arguments: ConfirmCodeArgs(phone: phone));
   }
+
+
+
+  void sendVerificationCode() async {
+    await _auth.verifyPhoneNumber(
+        timeout: const Duration(seconds: 60),
+        phoneNumber: phoneNumber,
+        verificationCompleted: (phoneAuthCredential) async {
+          //signInWithPhoneAuthCredential(phoneAuthCredential);
+        },
+        verificationFailed: (verificationFailed) async {
+          setState(() {
+            showLoading = false;
+          });
+        },
+        codeSent: (verificationId, resendingToken) async {
+          setState(() {
+            showLoading = false;
+            currentState = ResetPasswordState.SHOW_OTP_FORM_STATE;
+            this.verificationId = verificationId;
+          });
+          Navigator.pushNamed(context, ConfirmCode.routeName,
+              arguments: ConfirmCodeArgs(
+                  phone: phoneNumber));
+        },
+        codeAutoRetrievalTimeout: (verificationId) async {});
+  }
+  String verificationId = "";
+  String userInput = "";
+  bool showLoading = false;
+
+  late String phoneNumber;
+  ResetPasswordState currentState =
+      ResetPasswordState.SHOW_MOBILE_FORM_STATE;
 }
+enum ResetPasswordState { SHOW_MOBILE_FORM_STATE, SHOW_OTP_FORM_STATE }
+

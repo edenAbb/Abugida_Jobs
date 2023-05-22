@@ -18,7 +18,7 @@ class ProfileImage extends StatelessWidget {
         color: Theme.of(context).primaryColor,
         image: DecorationImage(
           image: NetworkImage(profileUrl),
-          fit: BoxFit.contain,
+          fit: BoxFit.cover,
         ),
         border: Border.all(
           color: color,

@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:et_job/cubits/account/account_state.dart';
 import 'package:et_job/repository/account.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../models/user.dart';
 
@@ -24,6 +27,24 @@ class AccountCubit extends Cubit<AccountState>{
       emit(UpdatedSuccessfully(message: message.message));
     }catch(e){
       emit(UpdatingFailed(error: e.toString()));
+    }
+  }
+  Future<void> uploadProfilePhoto(XFile photo) async {
+    emit(UploadOnProcess());
+    try{
+      var message = await accountRepository.uploadProfileImage(photo);
+      emit(UploadedSuccessfully(message: message.message));
+    }catch(e){
+      emit(UploadingFailed(error: e.toString()));
+    }
+  }
+  Future<void> uploadCV(File pdf) async {
+    emit(UploadOnProcess());
+    try{
+      var message = await accountRepository.uploadCV(pdf);
+      emit(UploadedSuccessfully(message: message.message));
+    }catch(e){
+      emit(UploadingFailed(error: e.toString()));
     }
   }
   Future<void> loadProfile() async {

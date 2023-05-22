@@ -15,17 +15,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'cubits/user/user_cubit.dart';
+import 'cubits/wallet/wallet_b_cubit.dart';
+import 'firebase_options.dart';
 import 'routes/routes.dart';
 import 'utils/network/network.dart';
 import 'utils/theme/theme_provider.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:firebase_core/firebase_core.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   NetworkManager connectionStatus = NetworkManager.getInstance();
   connectionStatus.initialize();
-
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   AccountRepository accountRepository =
       AccountRepository(httpClient: http.Client());
   VacancyRepository vacancyRepository =
@@ -91,6 +95,8 @@ class MyApp extends StatelessWidget {
               create: (context) => UserCubit(userRepository: userRepository)),
           BlocProvider(
               create: (context) => WalletCubit(walletRepository: walletRepository)),
+          BlocProvider(
+              create: (context) => WalletBCubit(walletRepository: walletRepository)),
 
         ],
         child:

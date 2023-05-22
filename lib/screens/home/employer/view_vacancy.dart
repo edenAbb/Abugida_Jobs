@@ -183,10 +183,6 @@ class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
     );
   }
 
-  void applyForJob(BuildContext context, Vacancy vacancy){
-    ShowMessage(context,"Apply","Thanks, We will let you know the result");
-  }
-
   Widget jobProperties(
       BuildContext context, IconData icon, String name, String value) {
     return Padding(
@@ -459,6 +455,10 @@ class _CreateVacancyScreenState extends State<CreateVacancyScreen> {
         });
       },
     );
+  }
+
+  void applyForJob(BuildContext context, Vacancy vacancy){
+    ShowMessage(context,"Apply","Thanks, We will let you know the result");
   }
 
 }
